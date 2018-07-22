@@ -11,6 +11,7 @@
 *.hsd
 *.db_info
 *.hier_info
+*.ammdb
 *.dfp
 *.rcfdb
 *.dpi
@@ -641,3 +642,4 @@ fpga/maxII/db/1w.lpc.html
 fpga/cIV/db/1w.lpc.html
 stm32/spi-1wire/MDK-ARM/startup_stm32f103xb.lst
 *.flock
+fpga/maxII/src/dt.v

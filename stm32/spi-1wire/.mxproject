@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=D:/temp/1wire/stm/spi-1wire/Inc
+HeaderPath=D:/temp/spi-1wire/stm32/spi-1wire/Inc
 HeaderFiles=stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;
-SourcePath=D:/temp/1wire/stm/spi-1wire/Src
+SourcePath=D:/temp/spi-1wire/stm32/spi-1wire/Src
 SourceFiles=stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]

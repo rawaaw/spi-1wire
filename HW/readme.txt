@@ -62,6 +62,8 @@ MISO    -   yellow  57 MISO PA16
 SCK     -   orange  55 SCK  PA14
 MOSI    -   green   58 MOSI PA15
 CS      -   red     56 CS   PA13
+1w_out  -           54
+1w_in   -           61
 
 ===
 CIV

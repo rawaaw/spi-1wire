@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Ign)
-		Device PartName(EPM570T100) MfrSpec(OpMask(0) SEC_Device(EPM570T100) Child_OpMask(2 3 3) FullPath("D:/temp/1wire/maxII/output_files/1w.pof"));
+		Device PartName(EPM570T100) MfrSpec(OpMask(0) SEC_Device(EPM570T100) Child_OpMask(2 3 3) FullPath("output_files/1w.pof"));
 
 ChainEnd;
 

@@ -3,47 +3,41 @@
 */
 `define SPI
 `define ONEWIRE
-`define INDICATION
+`define INDICATION_MAXII
 
 module onewire_top(
-  input CLK_50,
-                    //GND       CON26A 3    GND         blue    25
-  input clk,        //HSYNC     CON26A 8    SCK   PA14  orange  23
-  input cs,         //VSYNC     CON26A 7    CS    PA13  red     24
-  input mosi,       //PS2_DAT   CON26A 5    MOSI  PA15  green   19
-  output miso,      //PS2_CLK   CON26A 6    MISO  PA16  yellow  21
-
-  output wire_out,  //VB0       CON26A 10
-  input  wire_in    //VB2       CON26A 9 (connected to wire_out VB0)
+  input  CLK_50,  //12 50MHz crystal
+  input  clk,     //55
+  input  cs,      //56
+  output miso,    //57
+  input  mosi,    //58
+  output wire_out,//54
+  input  wire_in, //61
+  output led      //77
 /*       -+-
           |
          4.7k 
           |
-  VB0 ----+----->DQ DS18B20
+   54 ----+----->DQ DS18B20
           |
-  VB2 ----+
+   61 ----+
 */
-
-`ifdef INDICATION
-  ,
-
-  output DS_A,DS_B,DS_E,DS_F,
-  output DS_C,DS_D,DS_G,DS_DP,
-  output DS_EN1,DS_EN2,DS_EN3,DS_EN4
-`endif
 );
 
-wire clk0;
-wire n_rst;
-pll pll_inst(
-//   .areset(SW),
-   .inclk0(CLK_50),
-   .c0(clk0),
-//,
-//   .c1(clk1),
-//   .c2(clk2),
-   .locked (n_rst)
-);
+reg [2:0]divider = 3'h0;
+reg clk0 = 0;
+always @(posedge CLK_50) //25MHz
+begin
+  if (divider < 1)
+  begin
+    divider  = divider + 1;
+  end
+  else
+  begin
+    clk0 = ~clk0;
+    divider = 0; 
+  end 
+end
 
 wire [7:0]buf_byte_1w_rd;
 wire [15:0]buf_byte_spi_rd;
@@ -195,43 +189,24 @@ always @(posedge clk0, posedge spi_data_rdy)begin
 end
 `endif
 
-/* indication ->> */
-`ifdef INDICATION
-wire [6:0]ds_reg;
-wire [3:0]ds_en;
-assign {DS_G,DS_F,DS_E,DS_D,DS_C,DS_B,DS_A} = ds_reg ;
-assign {DS_EN1,DS_EN2,DS_EN3,DS_EN4} = ds_en;
-
-reg [31:0]count;
-assign DS_DP = onewire_dev_present;
-
-reg  [3:0]num_dt[3:0];
-dt_module dt_ct(
-  .clk(clk0),
-  .num1(num_dt[0]),
-  .num2(num_dt[1]),
-  .num3(num_dt[2]),
-  .num4(num_dt[3]),
-  .ds_en(ds_en),
-  .ds_reg(ds_reg)
-);
-
-always @(posedge clk0)
+// indication ->>
+`ifdef INDICATION_MAXII
+reg [31:0]count = 32'h0;
+reg led_reg = 0;
+assign led = led_reg;
+always @(posedge CLK_50)
 begin
-  if (count < 12000000)
-    count = count + 1;
+  if (count < 10000000)
+  begin
+    count  = count + 1;
+  end
   else
   begin
-    count  = 0;
-  end
-  num_dt[0] = buf_byte_1w_wr[11:8];
-  num_dt[1] = buf_byte_1w_wr[15:12];
-//  num_dt[2] = state;
-  num_dt[2] = buf_byte_1w_rd[3:0];
-  num_dt[3] = buf_byte_1w_rd[7:4];
+    led_reg = ~led_reg;
+    count = 0; 
+  end 
 end
-
 `endif
-/* <<- indication */
+// <<- indication
 
 endmodule

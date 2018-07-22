@@ -9,14 +9,14 @@
 //
 //
 //--------------------------------------------------------------------------------------------
-`define fclk  24
-`define Trstl 480*24
-`define Trsth 480*24
-`define Tpdih 40*24
-`define Tslot 100*24 // 60-120us
-`define Tlow1 10*24  // write '1' : 10us (<=15us)
-`define Trec  2*24   // recovery time : 2u (>=1us)
-`define T1us  1*24
+`define fclk  25
+`define Trstl 480*25
+`define Trsth 480*25
+`define Tpdih 40*25
+`define Tslot 100*25 // 60-120us
+`define Tlow1 10*25  // write '1' : 10us (<=15us)
+`define Trec  2*25   // recovery time : 2u (>=1us)
+`define T1us  1*25
 
 
 module one_wire(
@@ -29,7 +29,7 @@ output reg      presense,   //1w defice presense
 output reg      busy,
 input      [7:0]in_byte,
 output reg [7:0]out_byte,
-input           clk         //24 MHz
+input           clk         //25 MHz
 );
 
   reg              count;
