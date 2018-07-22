@@ -7,3 +7,4 @@ fpga-reset-presence-read-serial-num.usbeecomp
 
 for read .usbeecomp use USBee Suite:
 https://www.usbee.com/download.htm
+
