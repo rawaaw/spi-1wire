@@ -643,3 +643,6 @@ fpga/cIV/db/1w.lpc.html
 stm32/spi-1wire/MDK-ARM/startup_stm32f103xb.lst
 *.flock
 fpga/maxII/src/dt.v
+fpga/cIV/db/1w.sgate.nvd
+fpga/cIV/db/1w.sgate_sm.nvd
+*.bak

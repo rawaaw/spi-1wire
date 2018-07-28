@@ -77,12 +77,65 @@ if __name__ == '__main__':
 
       spi = SPI_TEST(0)
 
-      a0 = spi.read8(0x00) #reset
-      time.sleep(0.002)
+      read_8_bytes = 8
 
-      a0 = spi.read(0xCC, (0x01 << 4) | 0x01) #write cmd SKIP ROM (1 byte)
+      a0 = spi.read8(0x00) #reset
+#      time.sleep(2)
+
+      a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
       sleep(0.002)
 
+      if (read_8_bytes):
+        a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
+        sleep(0.008) # >= 8ms 
+        a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
+        sleep(0.002)
+        print "SN: %64X" % (a0)
+      else: # read 8 x 1byte
+        sleep(0.002) # >= 8ms 
+        spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+
+        sn0 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn1 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn2 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn3 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn4 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn5 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn6 = spi.read8((0x02 << 4) | 0x01)
+        sleep(0.002)
+        sn7 = spi.read8((0x03 << 4) | 0x01)
+        sleep(0.002)
+        print "SN: %8X %8X %8X %8X %8X %8X %8X %8X" % (sn0, sn1, sn2, sn3, sn4, sn5, sn6, sn7)
+
+      if (0):
+        a0 = spi.read8(0x00) #reset
+        sleep(0.002)
+        a0 = spi.read(0xEE, (0x01 << 4) | 0x01) #write cmd MATCH ROM (1 byte)
+        sleep(0.002)
+
+        sn0 = spi.read(sn0, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn1 = spi.read(sn1, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn2 = spi.read(sn2, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn3 = spi.read(sn3, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn4 = spi.read(sn4, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn5 = spi.read(sn5, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn6 = spi.read(sn6, (0x01 << 4) | 0x01)
+        sleep(0.002)
+        sn7 = spi.read(sn7, (0x01 << 4) | 0x01)
+        sleep(0.008)
 
       if (1):
         print "CONVERT T"
@@ -96,11 +149,11 @@ if __name__ == '__main__':
 #        print "conv.status: %8X" % (a0)
 #        sleep(0.002)
 
-        sleep(0.4)
+        sleep(1.1)
 
-#        print "read conv.status"
-#        a0 = spi.read8((0x02 << 4) | 0x01) #read conv.status
-#        sleep(0.002)
+        print "read conv.status"
+        a0 = spi.read8((0x02 << 4) | 0x01) #read conv.status
+        sleep(0.002)
 
 #        a0 = spi.read8((0x03 << 4) | 0x01) #read buffer cmd
 #        print "read conv.status %.1X" % (a0)

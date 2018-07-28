@@ -45,8 +45,8 @@ pll pll_inst(
    .locked (n_rst)
 );
 
-wire [7:0]buf_byte_1w_rd;
-wire [15:0]buf_byte_spi_rd;
+wire [63:0]buf_byte_1w_rd;
+wire [63:0]buf_byte_spi_rd;
 wire [2:0]state;
 reg resense;
 wire busy;
@@ -75,8 +75,10 @@ reg  read_byte = 0;
 reg  write_byte = 0;
 
 `ifdef ONEWIRE
-reg [15:0] buf_byte_1w_wr;  /* write to 1w */
+reg [63:0] buf_byte_1w_wr;  /* write to 1w */
 reg       spi_data_rdy = 0;
+reg [5:0] start_bit;
+reg [5:0] end_bit;
 
 
 one_wire onewire(
@@ -87,8 +89,10 @@ one_wire onewire(
   .wire_in(wire_in),
   .presense(presense),
   .busy(busy),
-  .in_byte(buf_byte_1w_wr[7:0]),
+  .in_byte(buf_byte_1w_wr[15:8]),  /* 1wire command */
   .out_byte(buf_byte_1w_rd),
+  .start_bit(start_bit),
+  .end_bit(end_bit),
   .clk(clk0)
 );
 `endif
@@ -115,8 +119,12 @@ always @(posedge clk0, posedge spi_data_rdy)begin
   end
   else begin
 */  
-    case (buf_byte_1w_wr[15:8]) 
-      8'h01:begin /* 1wire reset */
+    /*
+       [7:4] - cmd (0 - rst ,1 - wr ,2 - rd 1w, 3 - rd buf)
+       [3:0] - 0 means 1 bit, 1-8 means 1-8 bytes per cycle)
+    */
+    case (buf_byte_1w_wr[7:4]) 
+      4'h0:begin /* 1wire reset */
         if (spi_data_rdy) begin
           onewire_dev_present <= 0;
           reset <= 1;
@@ -131,11 +139,13 @@ always @(posedge clk0, posedge spi_data_rdy)begin
           write_byte = 1'b0;
         end
       end
-      8'h02:begin /* 1wire write */
+      4'h1:begin /* 1wire write */
         if (spi_data_rdy) begin
           reset = 1'b0;
           read_byte = 1'b0;
           write_byte = 1'b1;
+          start_bit = 0;
+          end_bit = 7;
         end
         else begin
           reset = 1'b0;
@@ -143,11 +153,41 @@ always @(posedge clk0, posedge spi_data_rdy)begin
           write_byte = 1'b0;
         end
       end
-      8'h03:begin /* 1wire read */
+      8'h2:begin /* 1wire read 1,2,4,8 byte */
         if (spi_data_rdy) begin
           reset = 1'b0;
           read_byte = 1'b1;
           write_byte = 1'b0;
+          case (buf_byte_1w_wr[3:0]) /* read bytes 1-8 (0 means 1 bit) */
+            4'h00:begin       /* 1 bit */
+              start_bit = 63;
+              end_bit = 63;
+            end
+            4'h01:begin       /* 1 byte */
+              start_bit = 56;
+              end_bit = 63;
+            end
+            4'h02:begin       /* 2 bytes */
+              start_bit = 48;
+              end_bit = 63;
+            end
+            4'h04:begin       /* 4 bytes */
+              start_bit = 32;
+              end_bit = 63;
+            end
+            4'h06:begin       /* 6 bytes */
+              start_bit = 16;
+              end_bit = 63;
+            end
+            4'h08:begin       /* 8 bytes */
+              start_bit = 0;
+              end_bit = 63;
+            end
+            default:begin
+              start_bit = 0;
+              end_bit = 0;
+            end
+          endcase
         end
         else begin
           reset = 1'b0;
@@ -156,7 +196,7 @@ always @(posedge clk0, posedge spi_data_rdy)begin
         end
       end
 
-      8'h04:begin /* buffer read w/o 1wire read */
+      8'h3:begin /* buffer read w/o 1wire read */
         reset = 1'b0;
         read_byte = 1'b0;
         write_byte = 1'b0;
