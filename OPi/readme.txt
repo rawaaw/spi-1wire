@@ -26,3 +26,9 @@ usage .c example:
 
 gcc -o spi spi.c
 ./spi /dev/spidev1.0
+
+
+===
+single wire DHT11 sensor (https://www.mouser.com/ds/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf)
+
+test_spi_sw_fpga.py

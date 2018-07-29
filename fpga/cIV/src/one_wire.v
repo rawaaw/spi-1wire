@@ -25,7 +25,7 @@ input           read_byte,  //cmd write byte
 input           write_byte, //cmd read byte
 output reg      wire_out,   // 1wire in/out
 input           wire_in,
-output reg      presense,   //1w defice presense
+output reg      presence,   //1w defice presence
 output reg      busy,
 input      [63:0]in_byte,
 output reg [63:0]out_byte,
@@ -41,7 +41,7 @@ input           clk         //24 MHz
 
   parameter [2:0]  state_start       = 0,
                    state_delay_reset = 1,
-                   state_wire_read_presense = 2,
+                   state_wire_read_presence = 2,
                    state_wire_0      = 3,
                    state_wire_write  = 4,
                    state_wire_read   = 5,
@@ -65,7 +65,7 @@ input           clk         //24 MHz
         if (reset == 1'b1)begin
            busy <= 1'b1;
 //           out_byte <= 0;
-           presense <= 1'b0;
+           presence <= 1'b0;
            state <= state_delay_reset;
         end
         else if (write_byte == 1'b1)begin
@@ -94,16 +94,16 @@ input           clk         //24 MHz
         wire_out <= 1'b0;
         count <= 1'b1;
         if (counter == `Trstl) begin  // 480us
-           state <= state_wire_read_presense;
+           state <= state_wire_read_presence;
            count <= 1'b0;
         end
       end
        
-      state_wire_read_presense: begin
+      state_wire_read_presence: begin
         wire_out <= 1'bZ;
         count <= 1'b1;
         if (counter == `Tpdih)       // 40us (for DS18B20 ~29us)
-          presense <= (~wire_in);
+          presence <= (~wire_in);
         if (counter == `Trsth)begin  // 480us
           state <= state_start;
           count <= 1'b0;
