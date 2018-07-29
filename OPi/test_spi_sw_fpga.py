@@ -85,9 +85,12 @@ if __name__ == '__main__':
       a0 = spi.read40([0,0,0,0], (0x03 << 4)) #read buffer : read 5 bytes
       sleep(0.002)
       print "DHT11: %40X" % (a0)
-      print "DHT11: HUM: %.2f" % ((a0 >> 32) + (((a0 >> 24) & 0xFF) / 100.0));
-      print "DHT11: TEMP: %.2f" % (((a0 >> 16) & 0xFF) + (((a0 >> 8) & 0xFF) / 100.0));
+      print "DHT11: HUM: %.2f" % ((a0 >> 32) + (((a0 >> 24) & 0xFF) / 100.0))
+      print "DHT11: TEMP: %.2f" % (((a0 >> 16) & 0xFF) + (((a0 >> 8) & 0xFF) / 100.0))
 
-      print ""
+      csum = ((a0 >> 32) + ((a0 >> 24) & 0xFF) + ((a0 >> 16) & 0xFF) + (((a0 >> 8) & 0xFF)) & 0xFF)
+      psum = (a0 & 0xFF);
+
+      print "calculated sum: %2X received sum: %2X" % (csum, psum)
       exit(0)
  
