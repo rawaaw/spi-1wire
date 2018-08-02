@@ -25,11 +25,13 @@ input           read_byte,  //cmd write byte
 input           write_byte, //cmd read byte
 output reg      wire_out,   // 1wire in/out
 input           wire_in,
-output reg      presense,   //1w defice presense
+output reg      presence,   //1w defice presence
 output reg      busy,
-input      [7:0]in_byte,
-output reg [7:0]out_byte,
-input           clk         //25 MHz
+input      [63:0]in_byte,
+output reg [63:0]out_byte,
+input      [5:0]start_bit, // 56 48 32 0 (1 2 4 8 bytes )
+input      [5:0]end_bit,   // 56 48 32 0 (1 2 4 8 bytes )
+input           clk         //24 MHz
 );
 
   reg              count;
@@ -39,7 +41,7 @@ input           clk         //25 MHz
 
   parameter [2:0]  state_start       = 0,
                    state_delay_reset = 1,
-                   state_wire_read_presense = 2,
+                   state_wire_read_presence = 2,
                    state_wire_0      = 3,
                    state_wire_write  = 4,
                    state_wire_read   = 5,
@@ -48,7 +50,7 @@ input           clk         //25 MHz
 
   reg [2:0]        state = state_start;
 
-  reg [2:0]        n_bit;
+  reg [5:0]        n_bit;
   reg              f;
 
 //`define DUMMY
@@ -62,18 +64,24 @@ input           clk         //25 MHz
       state_start: begin
         if (reset == 1'b1)begin
            busy <= 1'b1;
-           presense <= 1'b0;
+//           out_byte <= 0;
+           presence <= 1'b0;
            state <= state_delay_reset;
         end
         else if (write_byte == 1'b1)begin
            f <= 1'b0;
            busy <= 1'b1;
+//           out_byte <= 0;
            state <= state_wire_0;
+           n_bit <= start_bit;
         end
         else if (read_byte == 1'b1)begin
            f <= 1'b1;
            busy <= 1'b1;
+//           out_byte <= 0;
            state <= state_wire_0;
+           n_bit <= start_bit;
+           out_byte <= 0;
         end
         else begin
           wire_out <= 1'bZ;
@@ -86,16 +94,16 @@ input           clk         //25 MHz
         wire_out <= 1'b0;
         count <= 1'b1;
         if (counter == `Trstl) begin  // 480us
-           state <= state_wire_read_presense;
+           state <= state_wire_read_presence;
            count <= 1'b0;
         end
       end
        
-      state_wire_read_presense: begin
+      state_wire_read_presence: begin
         wire_out <= 1'bZ;
         count <= 1'b1;
         if (counter == `Tpdih)       // 40us (for DS18B20 ~29us)
-          presense <= (~wire_in);
+          presence <= (~wire_in);
         if (counter == `Trsth)begin  // 480us
           state <= state_start;
           count <= 1'b0;
@@ -135,8 +143,8 @@ input           clk         //25 MHz
         if (counter == (`Tslot - `Tlow1))begin // 100us - 10us
           count <= 1'b0;
           wire_out <= 1'bZ;
-          if (n_bit == 7)begin
-            n_bit <= 0;
+          if (n_bit == end_bit)begin
+            n_bit <= start_bit;
             state <= state_start;
           end
           else begin

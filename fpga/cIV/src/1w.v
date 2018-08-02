@@ -3,8 +3,8 @@
 */
 `define SPI
 `define WIRE
-//`define ONEWIRE
-`define SINGLEWIRE
+`define ONEWIRE
+//`define SINGLEWIRE
 `define INDICATION
 
 module onewire_top(
@@ -73,7 +73,7 @@ assign miso = mosi;
 `endif
 
 reg  reset = 0;
-reg  presence = 0;
+wire presence;
 reg  read_byte = 0;
 reg  write_byte = 0;
 reg  read_swire_data = 0;

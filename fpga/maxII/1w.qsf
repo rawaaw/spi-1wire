@@ -73,10 +73,11 @@ set_location_assignment PIN_77 -to led
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to led
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS OFF
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
-set_global_assignment -name VERILOG_FILE src/1w.v
-set_global_assignment -name VERILOG_FILE src/spi_slave_v2.v
-set_global_assignment -name VERILOG_FILE src/one_wire.v
-set_global_assignment -name CDF_FILE 1w.cdf
 set_global_assignment -name STATE_MACHINE_PROCESSING "ONE-HOT"
 set_location_assignment PIN_61 -to wire_in
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to wire_in
+set_global_assignment -name VERILOG_FILE src/1w.v
+set_global_assignment -name VERILOG_FILE src/spi_slave_v2.v
+set_global_assignment -name VERILOG_FILE src/one_wire.v
+set_global_assignment -name VERILOG_FILE src/single_wire.v
+set_global_assignment -name CDF_FILE 1w.cdf

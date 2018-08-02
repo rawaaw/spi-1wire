@@ -3,16 +3,16 @@ module SPI_slave(
   input        CLK,
   input        SCK,
   input        MOSI,
-  input  [7:0] SPI_WR_BUF,  //write to SPI
+  input [63:0] SPI_WR_BUF,  //write to SPI
   output reg   MISO,
   input        CS,
-  output [15:0] SPI_RD_BUF, //read from SPI
+  output[63:0] SPI_RD_BUF, //read from SPI
   output       SPI_DONE,
   output [2:0] STATE
 );
   
-  reg [15:0]    dat_out_reg = 16'h0;
-  reg [7:0]    dat_in_reg = 8'h0;
+  reg [63:0]    dat_out_reg = 64'h0;
+  reg [63:0]    dat_in_reg = 64'h0;
   
   reg clk_in;
   reg cs_in;
@@ -67,7 +67,7 @@ module SPI_slave(
  
   always @(posedge CLK)begin
     if (sCS == 0)
-      MISO  <= dat_in_reg[7];
+      MISO  <= dat_in_reg[63]; //!!!!!!
     else
       MISO  <= 1'b1;
   end
@@ -82,14 +82,14 @@ module SPI_slave(
     else
     begin   
       if (sCS == 1'b0 && start == 1'b0 && stop == 1'b0)begin  // negedge sSCK
-         dat_in_reg <= {dat_in_reg[6:0], 1'b0};
+         dat_in_reg <= {dat_in_reg[62:0], 1'b0}; //!!!!!!
       end
     end  
   end
 
   always @(posedge sSCK)begin
     if (cs_state == 2 /*sCS == 1'b0*/)begin
-       dat_out_reg <= {dat_out_reg[14:0], MOSI};
+       dat_out_reg <= {dat_out_reg[62:0], MOSI};
     end
   end
 

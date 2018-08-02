@@ -646,3 +646,7 @@ fpga/maxII/src/dt.v
 fpga/cIV/db/1w.sgate.nvd
 fpga/cIV/db/1w.sgate_sm.nvd
 *.bak
+fpga/cIV/db/1w.cbx.xml
+fpga/maxII/db/1w.atom_fit.nvd
+fpga/maxII/db/1w.sgate.nvd
+fpga/maxII/db/1w.sgate_sm.nvd
