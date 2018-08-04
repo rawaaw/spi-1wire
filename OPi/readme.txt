@@ -54,15 +54,30 @@ set 12bit ADC
 
 root@orangepizero:~/1w# python test_spi_1w_wr_scrathpad.py
 SN: 286164123388B709
+calculated CRC: 09
 WRITE SCRTCHPAD
+
+SN: 286164123388B709
+calculated CRC: 09
+READ SCRATHPAD
+read data
+scratchpad: 500505A07FFFFFFF
+scratchpad CRC: 58
+calculated CRC: 58
+
+SN: 286164123388B709
+calculated CRC: 09
 COPY SCRATCHPAD
 copy status
 copy status: 80
+
+SN: 286164123388B709
+calculated CRC: 09
 READ SCRATHPAD
 read data
-scratchpad: 630105A07FFFFFFF
-scratchpad CRC: 95
-temperature 22.19
+scratchpad: 500505A07FFFFFFF
+scratchpad CRC: 58
+calculated CRC: 58
 
 no changes:
 
@@ -263,15 +278,30 @@ set 9 bit ADC:
 
 root@orangepizero:~/1w# python test_spi_1w_wr_scrathpad.py
 SN: 28C235470A0000B5
+calculated CRC: B5
 WRITE SCRTCHPAD
+
+SN: 28C235470A0000B5
+calculated CRC: B5
+READ SCRATHPAD
+read data
+scratchpad: 840105A01FFF0C10
+scratchpad CRC: C2
+calculated CRC: C2
+
+SN: 28C235470A0000B5
+calculated CRC: B5
 COPY SCRATCHPAD
 copy status
 copy status: 80
+
+SN: 28C235470A0000B5
+calculated CRC: B5
 READ SCRATHPAD
 read data
-scratchpad: 620105A01FFF0E10
-scratchpad CRC: B3
-temperature 22.12
+scratchpad: 840105A01FFF0C10
+scratchpad CRC: C2
+calculated CRC: C2
 
 
 root@orangepizero:~/1w# python test_spi_1w_fpga_mb.py

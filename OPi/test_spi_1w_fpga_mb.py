@@ -46,7 +46,20 @@ class SPI_TEST:
 #                print "rbs:=%s" % (reply_bitstring)
                 reply = reply_bitstring[0:15]
                 return int(reply, 2)
- 
+
+        # https://stackoverflow.com/questions/29214301/ios-how-to-calculate-crc-8-dallas-maxim-of-nsdata
+        def dallas_crc8(self, data=0, size=1):
+          crc = 0
+          for i in range (0, (size)):
+#            print "i:%d shift:%d" % (i, ((size - i - 1) << 3))
+            inbyte = data >> ((size - i - 1) << 3)
+            for j in range (0, 8):
+              mix = (crc ^ inbyte) & 0x01
+              crc = crc >> 1
+              if (mix):
+                crc = crc ^ 0x8C
+              inbyte = inbyte >> 1
+          return int(crc)
 
 #
 #  SPI: [MS byte] ...[MS byte] [LS byte]
@@ -80,6 +93,7 @@ if __name__ == '__main__':
       a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
       sleep(0.002)
       print "SN: %.16X" % (a0)
+      print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
 
       if (1):
         print "CONVERT T"
@@ -126,6 +140,8 @@ if __name__ == '__main__':
       sleep(0.002) # >= 2ms
       a0 = spi.read8((0x03 << 4) | 0x01) #read buffer (scratchpad data CRC)
       print "scratchpad CRC: %.2X" % ((a0) & 0xFF)  #http://crccalc.com/ (CRC-8/MAXIM)
+
+      print "calculated CRC: %.2X" % (spi.dallas_crc8(scrp, 8))
 
       msb = (scrp >> 48) & 0xFF;
       lsb = (scrp >> 56) & 0xFF;

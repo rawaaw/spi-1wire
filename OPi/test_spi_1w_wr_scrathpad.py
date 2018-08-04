@@ -47,6 +47,18 @@ class SPI_TEST:
                 reply = reply_bitstring[0:15]
                 return int(reply, 2)
  
+        def dallas_crc8(self, data=0, size=1):
+          crc = 0
+          for i in range (0, (size)):
+#            print "i:%d shift:%d" % (i, ((size - i - 1) << 3))
+            inbyte = data >> ((size - i - 1) << 3)
+            for j in range (0, 8):
+              mix = (crc ^ inbyte) & 0x01
+              crc = crc >> 1
+              if (mix):
+                crc = crc ^ 0x8C
+              inbyte = inbyte >> 1
+          return int(crc)
 
 #
 #  SPI: [MS byte] ...[MS byte] [LS byte]
@@ -80,7 +92,7 @@ if __name__ == '__main__':
       a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
       sleep(0.002)
       print "SN: %.16X" % (a0)
-
+      print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
       print "WRITE SCRTCHPAD"
       a0 = spi.read(0x4E, (0x01 << 4) | 0x01) #write cmd WRITE SCRATHPAD
       sleep(0.002)
@@ -94,35 +106,18 @@ if __name__ == '__main__':
 #      a0 = spi.read((0x0 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (9 bit ADC)
       sleep(0.002)
 
-      if (1):
-        print "COPY SCRATCHPAD"
-        a0 = spi.read(0x48, (0x01 << 4) | 0x01) #write cmd COPY SCRATHPAD
+      print ""
+      a0 = spi.read8(0x00) #reset
+      time.sleep(0.002)
 
-
-        sleep(0.002)
-        print "copy status"
-        a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status (1bit)
-        sleep(0.002)
-        a0 = spi.read8((0x03 << 4) | 0x00) #read conv.status buffer
-        print "copy status: %.2X" % (a0)
-        sleep(0.002)
-        while (a0 != 0x80):
-          print "copy status"
-          a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status
-          sleep(0.002)
-          a0 = spi.read8((0x03 << 4) | 0x00) #read conv.status buffer
-          print "copy status: %.2X" % (a0)
-          sleep(0.002)
-
-        a0 = spi.read8(0x00) #reset
-        time.sleep(0.002)
-
-        a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
-        sleep(0.002)
-        a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
-        sleep(0.008) # >= 8ms 
-        a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
-        sleep(0.002)
+      a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
+      sleep(0.002)
+      a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
+      sleep(0.008) # >= 8ms 
+      a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
+      sleep(0.002)
+      print "SN: %.16X" % (a0)
+      print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
 
       print "READ SCRATHPAD"
       a0 = spi.read(0xBE, (0x01 << 4) | 0x01) #write cmd READ SCRATHPAD
@@ -139,10 +134,69 @@ if __name__ == '__main__':
       sleep(0.002) # >= 2ms
       a0 = spi.read8((0x03 << 4) | 0x01) #read buffer (scratchpad data CRC)
       print "scratchpad CRC: %.2X" % ((a0) & 0xFF)  #http://crccalc.com/ (CRC-8/MAXIM)
+      print "calculated CRC: %.2X" % (spi.dallas_crc8(scrp, 8))
 
-      msb = (scrp >> 48) & 0xFF;
-      lsb = (scrp >> 56) & 0xFF;
-      print "temperature %.2f" % (((msb << 8) | lsb) * 0.0625)
+      print ""
+      a0 = spi.read8(0x00) #reset
+      time.sleep(0.002)
+
+      a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
+      sleep(0.002)
+      a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
+      sleep(0.008) # >= 8ms 
+      a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
+      sleep(0.002)
+      print "SN: %.16X" % (a0)
+      print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
+
+      print "COPY SCRATCHPAD"
+      a0 = spi.read(0x48, (0x01 << 4) | 0x01) #write cmd COPY SCRATHPAD
+
+
+      sleep(0.002)
+      print "copy status"
+      a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status (1bit)
+      sleep(0.002)
+      a0 = spi.read8((0x03 << 4) | 0x00) #read conv.status buffer
+      print "copy status: %.2X" % (a0)
+      sleep(0.002)
+      while (a0 != 0x80):
+        print "copy status"
+        a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status
+        sleep(0.002)
+        a0 = spi.read8((0x03 << 4) | 0x00) #read conv.status buffer
+        print "copy status: %.2X" % (a0)
+        sleep(0.002)
+
+      print ""
+      a0 = spi.read8(0x00) #reset
+      time.sleep(0.002)
+
+      a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
+      sleep(0.002)
+      a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
+      sleep(0.008) # >= 8ms 
+      a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
+      sleep(0.002)
+      print "SN: %.16X" % (a0)
+      print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
+
+      print "READ SCRATHPAD"
+      a0 = spi.read(0xBE, (0x01 << 4) | 0x01) #write cmd READ SCRATHPAD
+      sleep(0.002)
+
+      print "read data"
+      a0 = spi.read(0x00, (0x02 << 4) | 0x08) #read cmd (scratchpad data)
+      sleep(0.008) # >= 8ms
+      scrp = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
+      print "scratchpad: %.16X" % (scrp)
+      sleep(0.002)
+
+      a0 = spi.read8((0x02 << 4) | 0x01) #read cmd (scratchpad data CRC)
+      sleep(0.002) # >= 2ms
+      a0 = spi.read8((0x03 << 4) | 0x01) #read buffer (scratchpad data CRC)
+      print "scratchpad CRC: %.2X" % ((a0) & 0xFF)  #http://crccalc.com/ (CRC-8/MAXIM)
+      print "calculated CRC: %.2X" % (spi.dallas_crc8(scrp, 8))
 
       print ""
       exit(0)
