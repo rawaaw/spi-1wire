@@ -81,30 +81,30 @@ if __name__ == '__main__':
 
       spi = SPI_TEST(0)
 
+      if (1):
+        a0 = spi.read8(0x00) #reset
+        time.sleep(0.002)
 
-      a0 = spi.read8(0x00) #reset
-      time.sleep(0.002)
-
-      a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
-      sleep(0.002)
-      a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
-      sleep(0.008) # >= 8ms 
-      a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
-      sleep(0.002)
-      print "SN: %.16X" % (a0)
-      print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
-      print "WRITE SCRTCHPAD"
-      a0 = spi.read(0x4E, (0x01 << 4) | 0x01) #write cmd WRITE SCRATHPAD
-      sleep(0.002)
-      a0 = spi.read(0x05, (0x01 << 4) | 0x01) #write Th
-      sleep(0.002)
-      a0 = spi.read(0xA0, (0x01 << 4) | 0x01) #write Tl
-      sleep(0.002)
-      a0 = spi.read((0x3 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (12 bit ADC)
-#      a0 = spi.read((0x2 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (11 bit ADC)
-#      a0 = spi.read((0x1 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (10 bit ADC)
-#      a0 = spi.read((0x0 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (9 bit ADC)
-      sleep(0.002)
+        a0 = spi.read(0x33, (0x01 << 4) | 0x01) #write cmd READ ROM (1 byte)
+        sleep(0.002)
+        a0 = spi.read8((0x02 << 4) | 0x08) #read cmd : read 8 bytes from 1wire device
+        sleep(0.008) # >= 8ms 
+        a0 = spi.read64([0,0,0,0,0,0,0], (0x03 << 4) | 0x08) #read buffer : read 8 bytes
+        sleep(0.002)
+        print "SN: %.16X" % (a0)
+        print "calculated CRC: %.2X" % (spi.dallas_crc8((a0 >> 8), 7))
+        print "WRITE SCRTCHPAD"
+        a0 = spi.read(0x4E, (0x01 << 4) | 0x01) #write cmd WRITE SCRATHPAD
+        sleep(0.002)
+        a0 = spi.read(0x05, (0x01 << 4) | 0x01) #write Th
+        sleep(0.002)
+        a0 = spi.read(0xA0, (0x01 << 4) | 0x01) #write Tl
+        sleep(0.002)
+        a0 = spi.read((0x3 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (12 bit ADC)
+  #      a0 = spi.read((0x2 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (11 bit ADC)
+  #      a0 = spi.read((0x1 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (10 bit ADC)
+  #      a0 = spi.read((0x0 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (9 bit ADC)
+        sleep(0.002)
 
       print ""
       a0 = spi.read8(0x00) #reset
