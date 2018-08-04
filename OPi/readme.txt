@@ -1,25 +1,11 @@
 install python SPI library
  spidev-3.2.tar.gz
 
-root@orangepizero:~/1w# python test_spi_1w_fpga.py
-rb:=BD 0
-rbs:=1011110100000000
-rb:=BD 0
-rbs:=1011110100000000
-rb:=BD 0
-rbs:=1011110100000000
-rb:=28 0                -- S/N->
-rbs:=0010100000000000
-rb:=61 0
-rbs:=0110000100000000
-rb:=64 0
-rbs:=0110010000000000
-rb:=12 0
-rbs:=0001001000000000
-rb:=33 0
-rbs:=0011001100000000
-rb:=BD 0                -- S/N<-
-rbs:=1011110100000000
+===
+
+DS18B20:
+ 
+root@orangepizero:~/1w# python test_spi_1w_fpga_mb.py
 
 ===
 usage .c example:
@@ -31,4 +17,289 @@ gcc -o spi spi.c
 ===
 single wire DHT11 sensor (https://www.mouser.com/ds/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf)
 
-test_spi_sw_fpga.py
+example: test_spi_sw_fpga.py
+
+===
+'China' DS18B20:
+no NVRAM and no possibility set ADC accuracy:
+
+after power up:
+
+root@orangepizero:~/1w# python test_spi_1w_fpga_mb.py
+SN: 286164123388B709
+CONVERT T
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 80
+READ SCRATHPAD
+read data
+scratchpad: 6201FFFF7FFFFFFF
+scratchpad CRC: 91
+temperature 22.12
+
+
+set 12bit ADC
+
+root@orangepizero:~/1w# python test_spi_1w_wr_scrathpad.py
+SN: 286164123388B709
+WRITE SCRTCHPAD
+COPY SCRATCHPAD
+copy status
+copy status: 80
+READ SCRATHPAD
+read data
+scratchpad: 630105A07FFFFFFF
+scratchpad CRC: 95
+temperature 22.19
+
+no changes:
+
+root@orangepizero:~/1w# python test_spi_1w_fpga_mb.py
+SN: 286164123388B709
+CONVERT T
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 80
+READ SCRATHPAD
+read data
+scratchpad: 600105A07FFFFFFF
+scratchpad CRC: 50
+temperature 22.00
+
+
+===
+Original Maxim DS18B20
+
+after power up:
+
+root@orangepizero:~/1w# python test_spi_1w_fpga_mb.py
+SN: 28C235470A0000B5
+CONVERT T
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 80
+READ SCRATHPAD
+read data
+scratchpad: 630105A07FFF0D10
+scratchpad CRC: 35
+temperature 22.19
+
+
+set 9 bit ADC:
+
+root@orangepizero:~/1w# python test_spi_1w_wr_scrathpad.py
+SN: 28C235470A0000B5
+WRITE SCRTCHPAD
+COPY SCRATCHPAD
+copy status
+copy status: 80
+READ SCRATHPAD
+read data
+scratchpad: 620105A01FFF0E10
+scratchpad CRC: B3
+temperature 22.12
+
+
+root@orangepizero:~/1w# python test_spi_1w_fpga_mb.py
+SN: 28C235470A0000B5
+CONVERT T
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 00
+read conv.status
+conv.status: 80
+READ SCRATHPAD
+read data
+scratchpad: 680105A01FFF0810
+scratchpad CRC: B5
+temperature 22.50

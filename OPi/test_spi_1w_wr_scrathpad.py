@@ -81,24 +81,37 @@ if __name__ == '__main__':
       sleep(0.002)
       print "SN: %.16X" % (a0)
 
+      print "WRITE SCRTCHPAD"
+      a0 = spi.read(0x4E, (0x01 << 4) | 0x01) #write cmd WRITE SCRATHPAD
+      sleep(0.002)
+      a0 = spi.read(0x05, (0x01 << 4) | 0x01) #write Th
+      sleep(0.002)
+      a0 = spi.read(0xA0, (0x01 << 4) | 0x01) #write Tl
+      sleep(0.002)
+      a0 = spi.read((0x3 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (12 bit ADC)
+#      a0 = spi.read((0x2 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (11 bit ADC)
+#      a0 = spi.read((0x1 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (10 bit ADC)
+#      a0 = spi.read((0x0 << 5) | 0x1F, (0x01 << 4) | 0x01) #write CONF REG (9 bit ADC)
+      sleep(0.002)
+
       if (1):
-        print "CONVERT T"
-        a0 = spi.read(0x44, (0x01 << 4) | 0x01) #write cmd CONVERT T
+        print "COPY SCRATCHPAD"
+        a0 = spi.read(0x48, (0x01 << 4) | 0x01) #write cmd COPY SCRATHPAD
 
 
         sleep(0.002)
-        print "read conv.status"
-        a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status
+        print "copy status"
+        a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status (1bit)
         sleep(0.002)
         a0 = spi.read8((0x03 << 4) | 0x00) #read conv.status buffer
-        print "conv.status: %.2X" % (a0)
+        print "copy status: %.2X" % (a0)
         sleep(0.002)
         while (a0 != 0x80):
-          print "read conv.status"
+          print "copy status"
           a0 = spi.read8((0x02 << 4) | 0x00) #read conv.status
           sleep(0.002)
           a0 = spi.read8((0x03 << 4) | 0x00) #read conv.status buffer
-          print "conv.status: %.2X" % (a0)
+          print "copy status: %.2X" % (a0)
           sleep(0.002)
 
         a0 = spi.read8(0x00) #reset
