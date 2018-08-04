@@ -20,6 +20,9 @@ single wire DHT11 sensor (https://www.mouser.com/ds/2/758/DHT11-Technical-Data-S
 example: test_spi_sw_fpga.py
 
 ===
+photo of china and original ICs:
+original-left-china-right.JPG
+
 'China' DS18B20:
 no NVRAM and no possibility set ADC accuracy:
 
