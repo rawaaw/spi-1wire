@@ -650,6 +650,6 @@ fpga/cIV/db/1w.cbx.xml
 fpga/maxII/db/1w.atom_fit.nvd
 fpga/maxII/db/1w.sgate.nvd
 fpga/maxII/db/1w.sgate_sm.nvd
-stm32/spi-1wire/MDK-ARM/startup_stm32f103xb.lst
-stm32/spi-1wire/MDK-ARM/startup_stm32f103xb.lst
-stm32/spi-1wire/MDK-ARM/startup_stm32f103xb.lst
+*.ok
+*.lst
+stm32/rf-1wire/*

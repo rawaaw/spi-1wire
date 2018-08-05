@@ -191,6 +191,12 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 //  ret = HAL_TIM_Base_Start_IT(&htim2);
+#if 0
+  while (1){
+    HAL_GPIO_TogglePin(TRANSM_PWR_GPIO_Port, TRANSM_PWR_Pin);
+    HAL_Delay(2000);
+  }
+ #endif
 
 
   /* USER CODE END 2 */
@@ -393,12 +399,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(TRANSM_PWR_GPIO_Port, TRANSM_PWR_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -413,6 +423,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(ONE_WIRE0_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TRANSM_PWR_Pin */
+  GPIO_InitStruct.Pin = TRANSM_PWR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(TRANSM_PWR_GPIO_Port, &GPIO_InitStruct);
 
 }
 

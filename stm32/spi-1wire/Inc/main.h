@@ -53,6 +53,8 @@
 #define LED_GPIO_Port GPIOC
 #define ONE_WIRE0_Pin GPIO_PIN_0
 #define ONE_WIRE0_GPIO_Port GPIOA
+#define TRANSM_PWR_Pin GPIO_PIN_10
+#define TRANSM_PWR_GPIO_Port GPIOB
 
 /* ########################## Assert Selection ############################## */
 /**
