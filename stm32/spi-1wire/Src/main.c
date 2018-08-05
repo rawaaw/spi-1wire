@@ -67,6 +67,84 @@ static void MX_TIM2_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+uint8_t dallas_crc8(const uint8_t * data, const uint32_t size){
+  uint8_t crc = 0;
+  for ( uint32_t i = 0; i < size; ++i ){
+    uint8_t inbyte = data[i];
+    for ( uint8_t j = 0; j < 8; ++j ){
+      uint8_t mix = (crc ^ inbyte) & 0x01;
+      crc >>= 1;
+      if ( mix ) crc ^= 0x8C;
+      inbyte >>= 1;
+    }
+  }
+  return crc;
+}
+
+uint32_t onewire_reset(GPIO_TypeDef *port, uint32_t pin){
+  uint32_t presence;
+  port->BSRR = (uint32_t)pin << 16U;
+  usleep_spin(2500);  //488us (reset) Trstl
+  port->BSRR = pin;
+  usleep_spin(300);   //60 us (presence)
+  if ((port->IDR & pin) != (uint32_t)GPIO_PIN_RESET){
+    presence = 0;
+  }else{
+    presence = 1;
+  }
+  usleep_spin(2500);  //488us (reset) Trsth
+  return presence;
+}
+
+uint32_t onewire_write(GPIO_TypeDef *port, uint32_t pin, uint8_t cmd){
+  int32_t i;
+  for (i = 0; i < 8; i ++){ // send command
+    port->BSRR = (uint32_t)pin << 16U;
+    if (cmd & (1 << i)){
+      usleep_spin(50); //10.5us
+      port->BSRR = pin;
+      usleep_spin(300);//~50us
+    }else{
+      usleep_spin(350);//~70us
+      port->BSRR = pin;
+    }
+    usleep_spin(50); //10.5us Trec
+  }
+  usleep_spin(500);
+  return 0;
+}
+
+uint32_t onewire_read(GPIO_TypeDef *port, uint32_t pin, uint8_t*data, uint32_t size_bytes){
+  int32_t i, bi;
+  uint8_t *p_data;
+  for (bi = 0; bi < size_bytes; bi ++){
+    p_data = &data[bi];
+    for (i = 0; i < 8; i ++){
+      port->BSRR = (uint32_t)pin << 16U;
+      usleep_spin(50); //10.5us Trdv
+      port->BSRR = pin;
+      usleep_spin(5); //1.5us
+      if ((port->IDR & pin) != (uint32_t)GPIO_PIN_RESET){ //1
+        (*p_data) |= (1 << i);
+      }
+      usleep_spin(350); //70us Tslot - Trdv
+    }
+  }
+  return 0;
+}
+
+uint32_t onewire_readbit(GPIO_TypeDef *port, uint32_t pin){
+  uint32_t bit = 0;
+  port->BSRR = (uint32_t)pin << 16U;
+  usleep_spin(50); //10.5us Trdv
+  port->BSRR = pin;
+  usleep_spin(5); //1.5us
+  if ((port->IDR & pin) != (uint32_t)GPIO_PIN_RESET){ //1
+    bit = 1;
+  }
+  usleep_spin(350); //70us Tslot - Trdv
+  return bit;
+}
 
 /* USER CODE END PFP */
 
@@ -84,10 +162,8 @@ int main(void)
   /* USER CODE BEGIN 1 */
   HAL_StatusTypeDef ret;
   uint8_t tx_buf[32], rx_buf[32];
-  uint32_t presence;
-  uint8_t  cmd;
-  uint8_t  rom[8], *p_rom;
-  int32_t i, bi;
+  uint32_t presence, i;
+  uint8_t  rom[8], scratchpad[9];
 
   /* USER CODE END 1 */
 
@@ -122,78 +198,40 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while(1){
-//    tx_buf[0] = 0x7E;
     ret = HAL_SPI_TransmitReceive  (&hspi1, tx_buf, rx_buf, 1, 1000000); //1000s
 
 //    usleep_spin(5);   //5.5-9 us if TIM2 enabled; 1.5-2 us if TIM2 disabled
 //    usleep_spin(35);  //7.5 us if TIM2 disabled
 //    usleep_spin(50);  //10.5 us if TIM2 disabled
 
-/* -->> reset cycle */
-    ONE_WIRE0_GPIO_Port->BSRR = (uint32_t)ONE_WIRE0_Pin << 16U;
-    usleep_spin(2500);  //488us (reset) Trstl
-    ONE_WIRE0_GPIO_Port->BSRR = ONE_WIRE0_Pin;
-    usleep_spin(300);   //60 us (presence)
-    if ((ONE_WIRE0_GPIO_Port->IDR & ONE_WIRE0_Pin) != (uint32_t)GPIO_PIN_RESET){
-      presence = 0;
-    }else{
-      presence = 1;
-    }
-    usleep_spin(2500);  //488us (reset) Trsth
-/*<-- */
+    onewire_reset(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin);
 
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, (presence)? GPIO_PIN_RESET:GPIO_PIN_SET);
 
-//    while(1){
-//    }
+    memset(rom, 0x00, sizeof(rom));
+    onewire_write(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, 0x33); /* READ ROM */
+    onewire_read(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, rom, 8);
 
-/* --> read lasered ROM code */
-    cmd = 0x33;
-    for (i = 0; i < 8; i ++){ // send command
-      ONE_WIRE0_GPIO_Port->BSRR = (uint32_t)ONE_WIRE0_Pin << 16U;
-      if (cmd & (1 << i)){
-        usleep_spin(50); //10.5us
-        ONE_WIRE0_GPIO_Port->BSRR = ONE_WIRE0_Pin;
-        usleep_spin(300);//~50us
-      }else{
-        usleep_spin(350);//~70us
-        ONE_WIRE0_GPIO_Port->BSRR = ONE_WIRE0_Pin;
-      }
-      usleep_spin(50); //10.5us Trec
+    onewire_write(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, 0x44); /* CONVERT T */
+    while(!onewire_readbit(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin)){
+      /* wait for T conversion done*/
     }
 
-    usleep_spin(500);
+    onewire_reset(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin);
+    memset(rom, 0x00, sizeof(rom));
+    onewire_write(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, 0x33); /* READ ROM */
+    onewire_read(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, rom, 8);
 
-    memset(rom, 0, sizeof(rom));
-    for (bi = 0; bi < 8; bi ++){
-      p_rom = &rom[bi];
-      for (i = 0; i < 8; i ++){
-        ONE_WIRE0_GPIO_Port->BSRR = (uint32_t)ONE_WIRE0_Pin << 16U;
-        usleep_spin(50); //10.5us Trdv
-        ONE_WIRE0_GPIO_Port->BSRR = ONE_WIRE0_Pin;
-        if ((ONE_WIRE0_GPIO_Port->IDR & ONE_WIRE0_Pin) != (uint32_t)GPIO_PIN_RESET){ //1
-          (*p_rom) |= (1 << i);
-        }
-        usleep_spin(350); //70us Tslot - Trdv
-      }
-    }
+    memset(scratchpad, 0x00, sizeof(scratchpad));
+    onewire_write(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, 0xBE); /* READ SCRATCHPAD */
+    onewire_read(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin, scratchpad, 9);
 
-    ret = HAL_SPI_TransmitReceive  (&hspi1, rom, rx_buf, 8, 1000000); //100s
+    ret = HAL_SPI_TransmitReceive  (&hspi1, scratchpad, rx_buf, 9, 1000000); //100s
     
     for (i = 0; i < 5; i++){
       HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
       HAL_Delay(330);
     }
-/* <<-- */
-
-//    HAL_GPIO_TogglePin(ONE_WIRE0_GPIO_Port, ONE_WIRE0_Pin);
-    //HAL_Delay(500);
-
-
-//    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-//    HAL_Delay(500);                                            // Wait 500ms
-//    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-//    HAL_Delay(500);                                            // Wait 500ms
   }
 
 #if 0
